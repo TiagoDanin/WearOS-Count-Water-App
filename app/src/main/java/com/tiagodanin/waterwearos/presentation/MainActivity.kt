@@ -1,27 +1,21 @@
-/* While this template provides a good starting point for using Wear Compose, you can always
- * take a look at https://github.com/android/wear-os-samples/tree/main/ComposeStarter and
- * https://github.com/android/wear-os-samples/tree/main/ComposeAdvanced to find the most up to date
- * changes to the libraries and their usages.
- */
-
 package com.tiagodanin.waterwearos.presentation
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.wear.compose.material.MaterialTheme
-import androidx.wear.compose.material.Text
+import androidx.compose.ui.unit.dp
+import androidx.wear.compose.material.*
 import com.tiagodanin.waterwearos.R
 import com.tiagodanin.waterwearos.presentation.theme.WaterWearOSTheme
 
@@ -29,41 +23,82 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            WearApp("Android")
+            WearApp()
         }
     }
 }
 
+private val count: MutableState<Float> = mutableStateOf(0f)
+
+@OptIn(ExperimentalWearMaterialApi::class)
 @Composable
-fun WearApp(greetingName: String) {
+fun WearApp() {
     WaterWearOSTheme {
-        /* If you have enough items in your list, use [ScalingLazyColumn] which is an optimized
-         * version of LazyColumn for wear devices with some added features. For more information,
-         * see d.android.com/wear/compose.
-         */
-        Column(
+        Scaffold(
             modifier = Modifier
                 .fillMaxSize()
                 .background(MaterialTheme.colors.background),
-            verticalArrangement = Arrangement.Center
+            timeText = {
+                TimeText()
+            },
         ) {
-            Greeting(greetingName = greetingName)
+            ProgressIndicatorWater()
         }
     }
 }
 
 @Composable
-fun Greeting(greetingName: String) {
-    Text(
-        modifier = Modifier.fillMaxWidth(),
-        textAlign = TextAlign.Center,
-        color = MaterialTheme.colors.primary,
-        text = stringResource(R.string.hello_world, greetingName)
-    )
+fun ProgressIndicatorWater() {
+    val recomedByDay = 3.0f
+    val progressOfDay: Float = count.value / recomedByDay
+
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        CircularProgressIndicator(
+            startAngle = 295f,
+            endAngle = 245f,
+            progress = progressOfDay, // Valor do progresso
+            strokeWidth = 5.dp,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(all = 10.dp)
+        )
+        InfoWater()
+    }
 }
+
+@Composable
+fun InfoWater() {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 30.dp),
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colors.primary,
+            text = "Você já bebeu ${count.value} litro de água hoje"
+        )
+        Button(
+            modifier = Modifier.padding(top = 5.dp),
+            onClick = { count.value += 0.5f },
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.cup_water),
+                contentDescription = "airplane",
+                modifier = Modifier
+                    .size(ButtonDefaults.DefaultButtonSize)
+                    .wrapContentSize(align = Alignment.Center),
+            )
+        }
+    }
+}
+
 
 @Preview(device = Devices.WEAR_OS_SMALL_ROUND, showSystemUi = true)
 @Composable
 fun DefaultPreview() {
-    WearApp("Preview Android")
+    WearApp()
 }
